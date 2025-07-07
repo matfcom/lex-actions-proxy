@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from typing import Optional
+import httpx
 
 app = FastAPI(
     title="API Jurídica Española Completa",
@@ -9,7 +9,14 @@ app = FastAPI(
 
 @app.get("/datosabiertos/api/boe/sumario/{fecha}")
 def obtener_sumario_boe(fecha: str):
-    return {"status": {"code": 200, "text": "OK"}, "data": {"sumario": {}}}
+    url = f"https://www.boe.es/datosabiertos/api/boe/sumario/{fecha}"
+    headers = {"Accept": "application/json"}
+    try:
+        response = httpx.get(url, headers=headers)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        return {"status": {"code": 500, "text": "Error"}, "error": str(e)}
 
 @app.get("/datosabiertos/api/legislacion-consolidada/id/{boe_id}/texto/bloque/{bloque_id}")
 def obtener_articulo_legislacion(boe_id: str, bloque_id: str):
